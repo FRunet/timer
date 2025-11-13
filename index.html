@@ -66,6 +66,12 @@
             font-weight: bold;
         }
 
+        .timer {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
         .label {
             position: absolute;
             bottom: 35px;
@@ -137,17 +143,15 @@
                 font-size: 22px;
                 margin-top: 15px;
             }
-            .circle {
-                width: 90px;
-                height: 90px;
+            .timer {
+                display: flex;
+                flex-direction: column;
+                flex-wrap: wrap;
+                align-content: center;
+                justify-content: flex-start;
+                align-items: center;
             }
-            .circle svg {
-                width: 90px;
-                height: 90px;
-            }
-            .circle span {
-                font-size: 18px;
-            }
+
             .label {
                 font-size: 12px;
                 bottom: 25px;
@@ -157,7 +161,7 @@
             }
             button {
                 font-size: 12px;
-                padding: 6px 12px;
+                padding: 8px 16px;
             }
             footer {
                 font-size: 18px;
