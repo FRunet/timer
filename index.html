@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Таймер до чебурнета</title>
+<meta name="description" content="Таймер обратного отсчёта до чебурнета">
+<style>
+    body {
+        font-family: "Segoe UI", sans-serif;
+        text-align: center;
+        background-color: #1d1d1d;
+        color: #e4e4e4;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    h1 {
+        margin-top: 20px;
+        font-size: 28px;
+    }
+
+    .timer {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .circle {
+        position: relative;
+        width: 130px;
+        height: 130px;
+    }
+
+    .circle svg {
+        transform: rotate(-90deg) scale(1, -1);
+        width: 130px;
+        height: 130px;
+    }
+
+    .circle circle {
+        fill: none;
+        stroke-width: 6;
+        stroke: #303030;
+    }
+
+    .circle .progress {
+        stroke: #ff6600;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.3s linear;
+    }
+
+    .circle span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%);
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .label {
+        position: absolute;
+        bottom: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 16px;
+    }
+
+    p {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #9e9e9e;
+    }
+
+    .buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        background-color: #ff6600;
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    button:hover {
+        background-color: #b84900;
+    }
+
+    footer {
+        background: #141414;
+        padding: 10px;
+        color: #ccc;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    footer img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        aspect-ratio: 1/1;
+    }
+
+    a {
+        color: #ff6600;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Медиазапросы для телефонов */
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 22px;
+            margin-top: 15px;
+        }
+        .circle {
+            width: 90px;
+            height: 90px;
+        }
+        .circle svg {
+            width: 90px;
+            height: 90px;
+        }
+        .circle span {
+            font-size: 18px;
+        }
+        .label {
+            font-size: 12px;
+            bottom: 25px;
+        }
+        .buttons {
+            gap: 8px;
+        }
+        button {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        footer {
+            font-size: 14px;
+            padding: 8px;
+        }
+        footer img {
+            width: 24px;
+            height: 24px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>До Чебурнета осталось</h1>
+        <div class="timer">
+            <div id="days" class="circle">
+                <svg><circle cx="65" cy="65" r="60"></circle><circle class="progress" cx="65" cy="65" r="60"></circle></svg>
+                <span>0</span><div class="label">дней</div>
+            </div>
+            <div id="hours" class="circle">
+                <svg><circle cx="65" cy="65" r="60"></circle><circle class="progress" cx="65" cy="65" r="60"></circle></svg>
+                <span>0</span><div class="label">часов</div>
+            </div>
+            <div id="minutes" class="circle">
+                <svg><circle cx="65" cy="65" r="60"></circle><circle class="progress" cx="65" cy="65" r="60"></circle></svg>
+                <span>0</span><div class="label">минут</div>
+            </div>
+            <div id="seconds" class="circle">
+                <svg><circle cx="65" cy="65" r="60"></circle><circle class="progress" cx="65" cy="65" r="60"></circle></svg>
+                <span>0</span><div class="label">секунд</div>
+            </div>
+            <div id="milliseconds" class="circle">
+                <svg><circle cx="65" cy="65" r="60"></circle><circle class="progress" cx="65" cy="65" r="60"></circle></svg>
+                <span>0</span><div class="label">миллисек</div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="copy">Копировать</button>
+            <button id="share">Поделиться</button>
+        </div>
+
+        <p>Окончание отсчёта: Воскресенье 01 марта 2026 года 00:00</p>
+    </main>
+
+    <footer id="orgFooter">----</footer>
+
+    <script>
+        let lastValues = { days:0, hours:0, minutes:0, seconds:0, milliseconds:0 };
+        let lastTimeString = "";
+
+        function updateTimer() {
+            const end = new Date("2026-03-01T00:00:00+03:00").getTime();
+            const now = Date.now();
+            let diff = Math.max(end - now, 0);
+
+            const days = Math.floor(diff / (1000*60*60*24));
+            const hours = Math.floor((diff / (1000*60*60)) % 24);
+            const minutes = Math.floor((diff / (1000*60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+            const milliseconds = diff % 1000;
+
+            setCircle("days", days, 365, days);
+            setCircle("hours", hours, 24, hours);
+            setCircle("minutes", minutes, 60, minutes);
+            setCircle("seconds", seconds, 60, seconds);
+            setCircle("milliseconds", milliseconds, 1000, Math.floor(milliseconds));
+
+            lastTimeString = `${days}д ${hours}ч ${minutes}м ${seconds}с ${milliseconds}мс`;
+            requestAnimationFrame(updateTimer);
+        }
+
+        function setCircle(id, value, max, displayValue) {
+            const circle = document.getElementById(id);
+            const progress = circle.querySelector(".progress");
+            const radius = progress.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progress.style.strokeDasharray = `${circumference}`;
+            const offset = circumference - (value / max) * circumference;
+
+            progress.style.transition = "stroke-dashoffset 0.1s linear";
+            progress.style.strokeDashoffset = offset;
+            circle.querySelector("span").textContent = displayValue;
+            lastValues[id] = value;
+        }
+
+        document.getElementById("copy").addEventListener("click", async function() {
+            try {
+                const text = `До Чебурнета осталось: ${lastTimeString}\n${window.location.href}`;
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    alert("Время скопировано!");
+                } else {
+                    const temp = document.createElement("textarea");
+                    temp.value = text;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(temp);
+                    alert("Скопировано (fallback)!");
+                }
+            } catch {
+                alert("Ошибка копирования");
+            }
+        });
+
+        document.getElementById("share").addEventListener("click", async function() {
+            const text = `До Чебурнета осталось: ${lastTimeString}\n${window.location.href}`;
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: "Таймер до Чебурнета", text });
+                } else {
+                    prompt("Скопируйте вручную:", text);
+                }
+            } catch {}
+        });
+
+        async function loadOrgData() {
+            const cacheKey = "cache";
+            const cacheTimeKey = "ttl";
+            const now = Date.now();
+            const cached = localStorage.getItem(cacheKey);
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+
+            if (cached && cachedTime && now - cachedTime < 86400000) {
+                renderOrg(JSON.parse(cached));
+                return;
+            }
+
+            try {
+                const res = await fetch("https://api.github.com/orgs/FRunet");
+                if (!res.ok) throw new Error("Ошибка запроса");
+                const data = await res.json();
+                localStorage.setItem(cacheKey, JSON.stringify(data));
+                localStorage.setItem(cacheTimeKey, now);
+                renderOrg(data);
+            } catch {
+                const footer = document.getElementById("orgFooter");
+                footer.textContent = "Не удалось загрузить данные FRunet";
+            }
+        }
+
+        function renderOrg(data) {
+            const footer = document.getElementById("orgFooter");
+            const avatarUrl = data.avatar_url ? data.avatar_url : "";
+            const orgName = data.name || data.login || "FRunet";
+            const htmlUrl = data.html_url || "#";
+
+            // Безопасное создание элементов
+            footer.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = avatarUrl;
+            img.alt = "GitHub Avatar";
+            img.onerror = function() { this.src = ""; };
+            const span = document.createElement("span");
+            const link = document.createElement("a");
+            link.href = htmlUrl;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = orgName;
+            span.appendChild(document.createTextNode("GitHub "));
+            span.appendChild(link);
+
+            footer.appendChild(img);
+            footer.appendChild(span);
+        }
+
+        updateTimer();
+        loadOrgData();
+    </script>
+</body>
+</html>
